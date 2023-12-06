@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-body, html {
+body {
     font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
-    scroll-behavior: smooth;
+    background: linear-gradient(to right, #6dd5ed, #2193b0); /* Example gradient */
     color: #333;
-    background-color: #fff;
     line-height: 1.6;
 }
+
 
 .container {
     max-width: 1200px;
@@ -18,7 +18,7 @@ body, html {
 }
 
 header {
-    background-color: #fff;
+    background: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: sticky;
     top: 0;
@@ -29,31 +29,27 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1em 0;
-}
-
-nav ul {
-    list-style: none;
-    display: flex;
-}
-
-nav ul li {
-    margin-left: 20px;
-}
-
-nav ul li a {
-    text-decoration: none;
-    color: #333;
-    transition: color 0.3s;
-}
-
-nav ul li a:hover {
-    color: #005f73;
+    padding: 1em 2em;
 }
 
 .logo {
     font-weight: 600;
     font-size: 1.5em;
+    color: #2193b0; /* Color that complements the gradient */
+}
+
+.logo img {
+    height: 50px; /* Adjust as needed */
+}
+
+.logo:before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('path_to_logo_icon.png');
+    background-size: cover;
+    margin-right: 10px;
 }
 
 .hero {
