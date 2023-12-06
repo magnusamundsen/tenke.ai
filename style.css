@@ -1,94 +1,57 @@
-/* Reset some default styles */
-* {
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+body, html {
+    font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-}
-
-/* Use Google Fonts for a modern look */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
-body {
-    font-family: 'Roboto', sans-serif;
+    scroll-behavior: smooth;
     color: #333;
-    background-color: #f4f4f4;
+    background-color: #fff;
     line-height: 1.6;
 }
 
 .container {
-    width: 80%;
-    margin: auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 50px;
     overflow: hidden;
 }
 
 header {
-    background: linear-gradient(to right, #005f73, #022c43);
-    color: #fff;
-    padding: 1rem 0;
-    position: fixed;
-    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
     top: 0;
-    z-index: 999;
+    z-index: 1000;
 }
 
-header .logo {
-    float: left;
-    margin-left: 2%;
-    font-size: 1.8em;
-    font-weight: 700;
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em 0;
 }
 
 nav ul {
-    float: right;
-    margin-right: 2%;
     list-style: none;
+    display: flex;
 }
 
 nav ul li {
-    display: inline;
-    margin: 0 15px;
+    margin-left: 20px;
 }
 
 nav ul li a {
-    color: #fff;
     text-decoration: none;
-    font-weight: 700;
-    transition: color 0.3s ease-in-out;
+    color: #333;
+    transition: color 0.3s;
 }
 
 nav ul li a:hover {
-    color: #aee1e1;
+    color: #005f73;
 }
 
-section {
-    padding: 60px 0;
-    background: #fff;
-}
-
-section:nth-child(even) {
-    background: #eef6f6;
-}
-
-footer {
-    background: #022c43;
-    color: #fff;
-    text-align: center;
-    padding: 1em 0;
-    font-size: 0.8em;
-}
-
-/* Add hover effects to buttons */
-button:hover, .btn:hover {
-    background: #027373;
-    color: #fff;
-    transition: background-color 0.3s ease-in-out;
-}
-
-/* Animations and transitions */
-section {
-    transition: all 0.3s ease-in-out;
-}
-
-section:hover {
-    transform: scale(1.02);
+.logo {
+    font-weight: 600;
+    font-size: 1.5em;
 }
