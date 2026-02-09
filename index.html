@@ -3,67 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tenke.ai - AI for Humanities</title>
+    <title>Gamling Dice Lounge</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Header with Navigation -->
-    <header>
-        <nav class="container">
-            <div class="logo">Tenke.ai</div>
-            <ul>
-                <li><a href="#about">About Us</a></li>
-                <li><a href="#services">Our Services</a></li>
-                <li><a href="#mission">Our Mission</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
+    <main class="app">
+        <header class="hero">
+            <p class="eyebrow">Gamling Dice Lounge</p>
+            <h1>Roll it big. Cash out at 1,000 coins.</h1>
+            <p class="subtitle">Start with 25 coins, set your bet, and roll the dice. Win if the roll is 4 or higher.</p>
+        </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1>Welcome to Tenke.ai</h1>
-            <p>Innovating AI for a deeper understanding of humanities and culture</p>
-            <button class="btn">Learn More</button>
-        </div>
-    </section>
+        <section class="game">
+            <div class="panel status-panel">
+                <div>
+                    <p class="label">Coins</p>
+                    <p class="value" id="coinCount">25</p>
+                </div>
+                <div>
+                    <p class="label">Last Roll</p>
+                    <p class="value" id="lastRoll">-</p>
+                </div>
+                <div>
+                    <p class="label">Streak</p>
+                    <p class="value" id="streak">0</p>
+                </div>
+            </div>
 
-    <!-- About Us Section -->
-    <section id="about" class="section">
-        <div class="container">
-            <h2>About Us</h2>
-            <p>At Tenke.ai, we are dedicated to harnessing the power of artificial intelligence to explore and understand the depths of human culture and experience...</p>
-        </div>
-    </section>
+            <div class="panel dice-panel">
+                <div class="dice" id="dice" aria-live="polite" aria-label="Dice roll result">
+                    <span class="pip"></span>
+                    <span class="pip"></span>
+                    <span class="pip"></span>
+                    <span class="pip"></span>
+                    <span class="pip"></span>
+                    <span class="pip"></span>
+                    <span class="pip"></span>
+                    <span class="pip"></span>
+                    <span class="pip"></span>
+                </div>
+                <p class="result" id="resultMessage" aria-live="polite">Set your bet and roll the dice.</p>
+            </div>
 
-    <!-- Our Services Section -->
-    <section id="services" class="section">
-        <div class="container grid-3">
-            <!-- Insert service cards here -->
-        </div>
-    </section>
+            <div class="panel controls">
+                <label for="betAmount">Bet amount</label>
+                <div class="bet-control">
+                    <input type="number" id="betAmount" min="1" step="1" value="5">
+                    <button class="secondary" id="maxBet">Max</button>
+                </div>
+                <button class="primary" id="rollButton">Roll the dice</button>
+                <button class="ghost" id="resetButton">Reset game</button>
+                <p class="rules">Win: roll 4–6. Lose: roll 1–3. Game ends at 0 or 1,000 coins.</p>
+            </div>
+        </section>
 
-    <!-- Our Mission Section -->
-    <section id="mission" class="section">
-        <div class="container">
-            <h2>Our Mission</h2>
-            <p>Our mission at Tenke.ai is to create AI technologies that serve as a bridge between the past, present, and future of human culture...</p>
-        </div>
-    </section>
+        <section class="log panel">
+            <h2>Game Log</h2>
+            <ul id="logList"></ul>
+        </section>
+    </main>
 
-    <!-- Contact Section -->
-    <section id="contact" class="section">
-        <div class="container">
-            <!-- Contact form or information -->
-        </div>
-    </section>
+    <script>
+        const coinCount = document.getElementById('coinCount');
+        const lastRoll = document.getElementById('lastRoll');
+        const streak = document.getElementById('streak');
+        const dice = document.getElementById('dice');
+        const resultMessage = document.getElementById('resultMessage');
+        const betAmount = document.getElementById('betAmount');
+        const rollButton = document.getElementById('rollButton');
+        const resetButton = document.getElementById('resetButton');
+        const maxBet = document.getElementById('maxBet');
+        const logList = document.getElementById('logList');
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>&copy; 2023 Tenke.ai - All Rights Reserved</p>
-        </div>
-    </footer>
+        let coins = 25;
+        let currentStreak = 0;
+        let rolling = false;
+
+        let audioContext;
+
+        const getAudioContext = () => {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            return audioContext;
+        };
+
+        const playTone = (frequency, duration, type = 'sine') => {
+            const context = getAudioContext();
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+            oscillator.type = type;
+            oscillator.frequency.value = frequency;
+            gainNode.gain.value = 0.12;
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+            oscillator.stop(context.currentTime + duration);
+        };
+
+        const playRollSound = () => playTone(220, 0.25, 'triangle');
+        const playWinSound = () => {
+            playTone(523, 0.2, 'sine');
+            setTimeout(() => playTone(659, 0.2, 'sine'), 160);
+            setTimeout(() => playTone(784, 0.25, 'sine'), 320);
+        };
+        const playLoseSound = () => playTone(160, 0.4, 'sawtooth');
+
+        const updateUI = () => {
+            coinCount.textContent = coins;
+            streak.textContent = currentStreak;
+            betAmount.max = Math.max(1, coins);
+            if (Number.parseInt(betAmount.value, 10) > coins) {
+                betAmount.value = coins;
+            }
+        };
+
+        const logEntry = (message) => {
+            const li = document.createElement('li');
+            li.textContent = message;
+            logList.prepend(li);
+            while (logList.children.length > 6) {
+                logList.removeChild(logList.lastChild);
+            }
+        };
+
+        const setDiceFace = (value) => {
+            dice.dataset.value = value;
+        };
+
+        const handleGameOver = (message) => {
+            resultMessage.textContent = message;
+            rollButton.disabled = true;
+            betAmount.disabled = true;
+            maxBet.disabled = true;
+        };
+
+        const rollDice = () => {
+            if (rolling) return;
+            const bet = Number.parseInt(betAmount.value, 10);
+            if (!bet || bet < 1 || bet > coins) {
+                resultMessage.textContent = 'Enter a valid bet within your coin balance.';
+                return;
+            }
+            rolling = true;
+            rollButton.disabled = true;
+            resultMessage.textContent = 'Rolling...';
+            dice.classList.add('rolling');
+            playRollSound();
+
+            setTimeout(() => {
+                const roll = Math.floor(Math.random() * 6) + 1;
+                setDiceFace(roll);
+                lastRoll.textContent = roll;
+
+                if (roll >= 4) {
+                    coins += bet;
+                    currentStreak += 1;
+                    resultMessage.textContent = `You won ${bet} coins!`;
+                    logEntry(`Win: rolled ${roll} and earned ${bet} coins.`);
+                    playWinSound();
+                } else {
+                    coins -= bet;
+                    currentStreak = 0;
+                    resultMessage.textContent = `You lost ${bet} coins.`;
+                    logEntry(`Loss: rolled ${roll} and lost ${bet} coins.`);
+                    playLoseSound();
+                }
+
+                updateUI();
+                dice.classList.remove('rolling');
+                rollButton.disabled = false;
+                rolling = false;
+
+                if (coins <= 0) {
+                    handleGameOver('Game over! You ran out of coins.');
+                } else if (coins >= 1000) {
+                    handleGameOver('Jackpot! You reached 1,000 coins.');
+                }
+            }, 900);
+        };
+
+        const resetGame = () => {
+            coins = 25;
+            currentStreak = 0;
+            lastRoll.textContent = '-';
+            resultMessage.textContent = 'Set your bet and roll the dice.';
+            logList.innerHTML = '';
+            setDiceFace(1);
+            rollButton.disabled = false;
+            betAmount.disabled = false;
+            maxBet.disabled = false;
+            updateUI();
+        };
+
+        rollButton.addEventListener('click', rollDice);
+        resetButton.addEventListener('click', resetGame);
+        maxBet.addEventListener('click', () => {
+            betAmount.value = coins;
+        });
+
+        updateUI();
+        setDiceFace(1);
+    </script>
 </body>
 </html>
